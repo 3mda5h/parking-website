@@ -4,10 +4,12 @@ STALL_WIDTH = 8.5
 STALL_DEPTH = 18 
 AISLE_WIDTH = 24
 
-total_stalls = 105;
+total_stalls = 100;
 var stall_columns; //total number of parking stall columns
 var stall_rows; //total number of parking stall rows
 var total_aisles; //total number of empty columns that make up the aisles between parking spaces
+
+const LOT_ASPECT_RATIO = 7.0;
 
 //smaller parking lots would likely be split into fewer different columns
 if(total_stalls <= 15) stall_columns = 1; 
@@ -15,10 +17,10 @@ if(total_stalls <= 30) stall_columns = 2;
 if(total_stalls <= 50) stall_columns = 3;
 else 
 {
-  stall_columns = Math.ceil(Math.sqrt(total_stalls));
+  stall_columns = Math.ceil(Math.sqrt(total_stalls / (LOT_ASPECT_RATIO * (STALL_WIDTH / STALL_DEPTH)))
+);
   console.log("stall columns: ", stall_columns)
 }
-
 stall_rows = Math.ceil(total_stalls / stall_columns);
 console.log("stall rows: ", stall_rows)
 total_aisles = Math.ceil(stall_columns/2);
