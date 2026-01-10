@@ -7,7 +7,7 @@ AISLE_WIDTH = 24
 total_stalls = 100;
 var stall_columns; //total number of parking stall columns
 var stall_rows; //total number of parking stall rows
-var total_aisles; //total number of empty columns that make up the aisles between parking spaces
+var total_aisles; //total number of columns that make up the aisles between parking spaces
 
 const LOT_ASPECT_RATIO = 7.0;
 
@@ -36,16 +36,21 @@ const svg = document.getElementById("car-lot-visual");
 const NS = "http://www.w3.org/2000/svg"; //SVG namespace
 
 
-//draw asphalt background
-const asphalt = document.createElementNS(NS, "rect");
-asphalt.setAttribute("x", 0);
-asphalt.setAttribute("y", 0);
-asphalt.setAttribute("width", (stall_columns * STALL_DEPTH) + (total_aisles * AISLE_WIDTH));
-asphalt.setAttribute("height", stall_rows * STALL_WIDTH);
-asphalt.setAttribute("fill", "#3e3d3dff");
-svg.appendChild(asphalt);
+function drawSVGRect(x, y, width, height, fill_color)
+{
+  const rect = document.createElementNS(NS, "rect"); //create rectangle elements in the SVG namespace
+  rect.setAttribute("x", x); //x-y position is the top-left corner of the rectangle
+  rect.setAttribute("y", y);
+  rect.setAttribute("width", width);
+  rect.setAttribute("height", height);
+  rect.setAttribute("fill", fill_color);
+  svg.appendChild(rect);
+}
 
-//draws horizontal parking stall lines
+//draw asphalt background
+drawSVGRect(0, 0, (stall_columns * STALL_DEPTH) + (total_aisles * AISLE_WIDTH), stall_rows * STALL_WIDTH, "#3e3d3dff");
+
+//draws lines for a horizontal parking stall
 //inputted x, y coordinates are the top left corner of stall
 function drawStall(svg, x, y, direction) 
 {
@@ -58,7 +63,7 @@ function drawStall(svg, x, y, direction)
   ];
 
   if(direction == "right") lines.push([x, y, x, y + STALL_WIDTH]); 
-  //else lines.push([x + STALL_DEPTH, y, x + STALL_DEPTH, y + STALL_WIDTH]);
+  //we don't need to ever draw a vertical line for the left parking stalls, because they will always come before a right one
 
   for (const [x1, y1, x2, y2] of lines) //for each line (pair of x,y cords)
   { 
@@ -74,7 +79,6 @@ function drawStall(svg, x, y, direction)
   }
 }
 
-
 for (let col = 0; col < (stall_columns + total_aisles); col++)
 {
   if(col % 3 == 1) //add an aisle after the first colum and then every two columns
@@ -89,30 +93,24 @@ for (let col = 0; col < (stall_columns + total_aisles); col++)
   }
   for (let row = 0; row < stall_rows; row++) 
   {
-    if(((stall_columns_drawn -1) * stall_rows) + row < total_stalls) //make sure were not drawing extra stalls in this column
+    const y_position = row * STALL_WIDTH;
+    if(current_space == 'STALL') 
     {
-      const y_position = row * STALL_WIDTH;
-      if((aisles_so_far * stall_rows) + row > total_stalls) //draw white space for extra aisles
-      {
-        const x_position = (stall_columns_drawn * STALL_DEPTH) + ((aisles_so_far -1) * AISLE_WIDTH); //don't count this aisle!
-        const blank = document.createElementNS(NS, "rect"); //create rectangle elements in the SVG namespace
-        blank.setAttribute("x", x_position); //x-y position is the top-left corner of the rectangle
-        blank.setAttribute("y", y_position);
-        blank.setAttribute("width", AISLE_WIDTH);
-        blank.setAttribute("height", STALL_WIDTH);
-        blank.setAttribute("fill", "#ffffffff=");
-        svg.appendChild(aisle);
-      }
-      else if(current_space == 'STALL')
+      const x_position = ((stall_columns_drawn - 1) * STALL_DEPTH) + (aisles_so_far * AISLE_WIDTH);
+      if((stall_columns_drawn -1) * stall_rows + row < total_stalls) //make sure were not drawing extra stalls in this column
       {
         var direction;
         if(col % 3 == 0) direction = "right";
         if(col % 3 == 2) direction = "left";
-        const x_position = ((stall_columns_drawn - 1) * STALL_DEPTH) + (aisles_so_far * AISLE_WIDTH);
         drawStall(svg, x_position, y_position, direction);
       }
+      else drawSVGRect(x_position, y_position, AISLE_WIDTH, STALL_DEPTH, "#ffffffff") //white out this stall
     }
-    
+    else if(current_space == 'AISLE' && (aisles_so_far * stall_rows) + row > total_stalls) //white out this aisle
+    {
+      var x_position = (stall_columns_drawn * STALL_DEPTH) + ((aisles_so_far -1) * AISLE_WIDTH)
+      drawSVGRect(x_position, y_position, AISLE_WIDTH, STALL_WIDTH, "#ffffffff")
+    }
   }
 }
 
