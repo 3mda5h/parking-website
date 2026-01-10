@@ -4,28 +4,19 @@ STALL_WIDTH = 8.5
 STALL_DEPTH = 18 
 AISLE_WIDTH = 24
 
-total_stalls = 100;
-var stall_columns; //total number of parking stall columns
-var stall_rows; //total number of parking stall rows
-var total_aisles; //total number of columns that make up the aisles between parking spaces
+total_stalls = 12;
+var stall_columns; //number of parking stall columns
+var stall_rows; //number of parking stall rows
+var aisle_columns; //number of columns that make up the aisles between parking spaces
 
-const LOT_ASPECT_RATIO = 7.0;
+if(total_stalls <= 11) stall_rows = total_stalls; //keep really small parking lots as just one column for simplicity
+else stall_rows = Math.ceil(Math.sqrt(total_stalls * (STALL_DEPTH / STALL_WIDTH))); //try to keep a good aspect ratio for bigger lots
+stall_columns = Math.ceil(total_stalls / stall_rows);
+aisle_columns = Math.ceil(stall_columns/2);
 
-//smaller parking lots would likely be split into fewer different columns
-if(total_stalls <= 15) stall_columns = 1; 
-if(total_stalls <= 30) stall_columns = 2;
-if(total_stalls <= 50) stall_columns = 3;
-else 
-{
-  stall_columns = Math.ceil(Math.sqrt(total_stalls / (LOT_ASPECT_RATIO * (STALL_WIDTH / STALL_DEPTH))));
-  console.log("stall columns: ", stall_columns)
-}
-stall_rows = Math.ceil(total_stalls / stall_columns);
-console.log("stall rows: ", stall_rows)
-total_aisles = Math.ceil(stall_columns/2);
-
-console.log("total aisles: ", total_aisles)
-
+console.log("stall rows: ", stall_rows);
+console.log("stall columns: ", stall_columns);
+console.log("aisles columns: ", aisle_columns)
 
 let current_space = 'STALL'
 let aisles_so_far = 0;
@@ -48,7 +39,7 @@ function drawSVGRect(x, y, width, height, fill_color)
 }
 
 //draw asphalt background
-drawSVGRect(0, 0, (stall_columns * STALL_DEPTH) + (total_aisles * AISLE_WIDTH), stall_rows * STALL_WIDTH, "#3e3d3dff");
+drawSVGRect(0, 0, (stall_columns * STALL_DEPTH) + (aisle_columns * AISLE_WIDTH), stall_rows * STALL_WIDTH, "#3e3d3dff");
 
 //draws lines for a horizontal parking stall
 //inputted x, y coordinates are the top left corner of stall
@@ -62,9 +53,9 @@ function drawStall(svg, x, y, direction)
     [x, y + STALL_WIDTH, x + STALL_DEPTH, y + STALL_WIDTH]
   ];
 
-  if(direction == "right") lines.push([x, y, x, y + STALL_WIDTH]); 
-  //we don't need to ever draw a vertical line for the left parking stalls, because they will always come before a right one
-
+  if(direction == "left") lines.push([x + STALL_DEPTH, y, x + STALL_DEPTH, y + STALL_WIDTH]); 
+  //we don't need to ever draw a vertical line for the right parking stalls, because they will always come before a lot edge or a left spot
+  
   for (const [x1, y1, x2, y2] of lines) //for each line (pair of x,y cords)
   { 
     //draw lines
@@ -79,7 +70,7 @@ function drawStall(svg, x, y, direction)
   }
 }
 
-for (let col = 0; col < (stall_columns + total_aisles); col++)
+for (let col = 0; col < (stall_columns + aisle_columns); col++)
 {
   if(col % 3 == 1) //add an aisle after the first colum and then every two columns
   {
@@ -104,16 +95,16 @@ for (let col = 0; col < (stall_columns + total_aisles); col++)
         if(col % 3 == 2) direction = "left";
         drawStall(svg, x_position, y_position, direction);
       }
-      else drawSVGRect(x_position, y_position, AISLE_WIDTH, STALL_DEPTH, "#ffffffff") //white out this stall
+      //else drawSVGRect(x_position, y_position, AISLE_WIDTH, STALL_DEPTH, "#ffffffff") //white out this stall
     }
     else if(current_space == 'AISLE' && (aisles_so_far * stall_rows) + row > total_stalls) //white out this aisle
     {
-      var x_position = (stall_columns_drawn * STALL_DEPTH) + ((aisles_so_far -1) * AISLE_WIDTH)
-      drawSVGRect(x_position, y_position, AISLE_WIDTH, STALL_WIDTH, "#ffffffff")
+      //var x_position = (stall_columns_drawn * STALL_DEPTH) + ((aisles_so_far -1) * AISLE_WIDTH)
+      //drawSVGRect(x_position, y_position, AISLE_WIDTH, STALL_WIDTH, "#ffffffff")
     }
   }
 }
 
 //0 0 is the top left corner of the SVG coordinates
 //units are abstract SVG units (not pixels) - automatically scales
-svg.setAttribute("viewBox", `0 0 ${(stall_columns * STALL_DEPTH) + (total_aisles * AISLE_WIDTH)} ${stall_rows * STALL_WIDTH} `);
+svg.setAttribute("viewBox", `0 0 ${(stall_columns * STALL_DEPTH) + (aisle_columns * AISLE_WIDTH)} ${stall_rows * STALL_WIDTH} `);
