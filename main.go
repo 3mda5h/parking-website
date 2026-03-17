@@ -6,8 +6,8 @@ import (
 )
 
 func main() {
-    fileServer := http.FileServer(http.Dir("./js"))
-	http.Handle("/js/", http.StripPrefix("/js/", fileServer))
+    assetsFileServer := http.FileServer(http.Dir("./assets"))
+	http.Handle("/assets/", http.StripPrefix("/assets/", assetsFileServer))
 	
 	http.Handle("/", http.FileServer(http.Dir("./pages")))
 	log.Println("Server running at http://localhost:3000")
