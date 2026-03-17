@@ -29,46 +29,34 @@ function GenerateLot()
   console.log("stall columns: ", stall_columns);
   console.log("aisles columns: ", aisle_columns)
 
-  let current_space = 'STALL'
-  let aisles_so_far = 0;
-  let stall_columns_drawn = 0;
-
+  let stalls_drawn = 0;
+  let current_x_position = 0;
+  let current_y_position = 0;
   //draw asphalt background
   drawSVGRect(0, 0, (stall_columns * STALL_DEPTH) + (aisle_columns * AISLE_WIDTH), stall_rows * STALL_WIDTH, "#3e3d3dff");
-
   for (let col = 0; col < (stall_columns + aisle_columns); col++)
   {
-    if(col % 3 == 1) //add an aisle after the first colum and then every two columns
-    {
-      current_space = 'AISLE';
-      aisles_so_far++;
-    }
-    else
-    { 
-      current_space = 'STALL'
-      stall_columns_drawn++;
-    }
     for (let row = 0; row < stall_rows; row++) 
     {
-      const y_position = row * STALL_WIDTH;
-      if(current_space == 'STALL') 
+      current_y_position = row * STALL_WIDTH;
+      if(col % 3 !== 1) //STALL COLUMN
       {
-        const x_position = ((stall_columns_drawn - 1) * STALL_DEPTH) + (aisles_so_far * AISLE_WIDTH);
-        if((stall_columns_drawn -1) * stall_rows + row < total_stalls) //make sure were not drawing extra stalls in this column
+        if(stalls_drawn < total_stalls) //only draw stall if we haven't drawn all stalls needed
         {
           let direction;
           if(col % 3 == 0) direction = "right";
           if(col % 3 == 2) direction = "left";
-          drawStall(svg, x_position, y_position, direction);
+          drawStall(svg, current_x_position, current_y_position, direction);
+          stalls_drawn++;
         }
-        //else drawSVGRect(x_position, y_position, AISLE_WIDTH, STALL_DEPTH, "#ffffffff") //white out this stall
-      }
-      else if(current_space == 'AISLE' && (aisles_so_far * stall_rows) + row > total_stalls) //white out this aisle
-      {
-        //var x_position = (stall_columns_drawn * STALL_DEPTH) + ((aisles_so_far -1) * AISLE_WIDTH)
-        //drawSVGRect(x_position, y_position, AISLE_WIDTH, STALL_WIDTH, "#ffffffff")
+        else drawSVGRect(current_x_position, current_y_position, AISLE_WIDTH + STALL_DEPTH, STALL_DEPTH, "#ffffffff"); //white out this stall and its aisle
       }
     }
+    //Parking lot is structured such that the first column is always stalls, the second column is an aisle, and then every two stall columns there is an aisle. 
+    //col % 3 will always be 1 if we are at an aisle column (where col is the current column number, starting at 0)
+    //col % 1 will be 2 or 0 if we are at a stall column
+    if(col % 3 == 1)current_x_position += AISLE_WIDTH;
+    else current_x_position += STALL_DEPTH;
   }
 
   //0 0 is the top left corner of the SVG coordinates
