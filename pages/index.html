@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script defer src="/js/car-parking.js"></script>
+        <script defer src="/js/car-parking.js"></script> 
         <!-- <link rel="stylesheet" href="/assets/style.css"> -->
 
         <title>Parking</title>
@@ -11,7 +11,8 @@
     <body>
         <h1>Parking lot generator</h1>   
         <h3>Enter number of cars: </h3>
-
+        <input id="total-cars-input" type="number" min="1" max="100000" value="20"></input>
+        <button id="generate-parking-lot-button">Generate</button>
         <svg id="car-lot-visual"></svg>
     </body>
 </html>
