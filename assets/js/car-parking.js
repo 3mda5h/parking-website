@@ -1,9 +1,20 @@
 const NS = "http://www.w3.org/2000/svg"; //SVG namespace
 const car_lot_svg = document.getElementById("car-lot-svg");
 
-export function GenerateCarLot(total_stalls, stall_columns, stall_rows, aisle_columns, STALL_WIDTH, STALL_DEPTH, AISLE_WIDTH)
+export function GenerateCarLot(total_vehicles, STALL_WIDTH, STALL_DEPTH, AISLE_WIDTH)
 {
   car_lot_svg.innerHTML = ""; //clear existing stalls
+  
+  let stall_rows;
+  if(total_vehicles <= 11) stall_rows = total_vehicles; //keep really small parking lots as just one column for simplicity
+  else stall_rows = Math.ceil(Math.sqrt(total_vehicles * (STALL_DEPTH / STALL_WIDTH))); //try to keep a good aspect ratio for bigger lots
+  let stall_columns = Math.ceil(total_vehicles / stall_rows);
+  let aisle_columns = Math.ceil(stall_columns/2);
+
+  console.log("stall rows: ", stall_rows);
+  console.log("stall columns: ", stall_columns);
+  console.log("aisles columns: ", aisle_columns)
+  
   let stalls_drawn = 0;
   let current_x_position = 0;
   let current_y_position = 0;
@@ -16,7 +27,7 @@ export function GenerateCarLot(total_stalls, stall_columns, stall_rows, aisle_co
       current_y_position = row * STALL_WIDTH;
       if(col % 3 !== 1) //STALL COLUMN
       {
-        if(stalls_drawn < total_stalls) //only draw stall if we haven't drawn all stalls needed
+        if(stalls_drawn < total_vehicles) //only draw stall if we haven't drawn all stalls needed
         {
           let direction;
           if(col % 3 == 0) direction = "right";
@@ -33,6 +44,11 @@ export function GenerateCarLot(total_stalls, stall_columns, stall_rows, aisle_co
     if(col % 3 == 1)current_x_position += AISLE_WIDTH;
     else current_x_position += STALL_DEPTH;
   }
+
+  return {
+        lot_width: (stall_columns * STALL_DEPTH) + (aisle_columns * AISLE_WIDTH),
+        lot_height: stall_rows * STALL_WIDTH
+    };
 }
 
 function drawSVGRect(x, y, width, height, fill_color)

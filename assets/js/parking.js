@@ -1,10 +1,18 @@
 import { GenerateCarLot } from "./car-parking.js";
 
-//https://www.dimensions.com/element/90-degree-parking-spaces-layouts
+//CAR PARKING MEASUREMENTS: ---------------------------------------
+//based on: https://www.dimensions.com/element/90-degree-parking-spaces-layouts
 //measurements are converted to inches to use same scale as bike parking
 const STALL_WIDTH = 8.5 * 12
 const STALL_DEPTH = 18 * 12
 const AISLE_WIDTH = 24 * 12
+
+//BIKE PARKING MEASUREMENTS: ---------------------------------------------
+//based on recommended dimensions here: https://blog.madrax.com/hubfs/Bike%20Parking%20Dimensions%20Bike%20Parking%20Lot%20Layout.png
+const RACK_WIDTH = 24
+const RACK_DISTANCE_FROM_BARRIER = 36
+const RACK_AISLE_WIDTH = 132
+const RACK_VERTICAL_SPACING = 48
 
 const svg = document.getElementById("lot-svg");
 
@@ -13,25 +21,13 @@ generate_button.addEventListener("click", GenerateLotComparison);
 
 function GenerateLotComparison()
 {
-  const total_stalls = Math.round(Number(document.getElementById("total-cars-input").value));
-  if(isNaN(total_stalls)) total_stalls = 20;
-  else if(total_stalls > 100000 ) total_stalls = 100000; 
-  let stall_columns; //number of parking stall columns
-  let stall_rows; //number of parking stall rows
-  let aisle_columns; //number of columns that make up the aisles between parking spaces
+  const total_vehicles = Math.round(Number(document.getElementById("total-cars-input").value));
+  if(isNaN(total_vehicles)) total_vehicles = 20;
+  else if(total_vehicles > 100000 ) total_vehicles = 100000; 
 
-  if(total_stalls <= 11) stall_rows = total_stalls; //keep really small parking lots as just one column for simplicity
-  else stall_rows = Math.ceil(Math.sqrt(total_stalls * (STALL_DEPTH / STALL_WIDTH))); //try to keep a good aspect ratio for bigger lots
-  stall_columns = Math.ceil(total_stalls / stall_rows);
-  aisle_columns = Math.ceil(stall_columns/2);
+  let lot_dimension = GenerateCarLot(total_vehicles, STALL_WIDTH, STALL_DEPTH, AISLE_WIDTH);
 
-  console.log("stall rows: ", stall_rows);
-  console.log("stall columns: ", stall_columns);
-  console.log("aisles columns: ", aisle_columns)
-
-  GenerateCarLot(total_stalls, stall_columns, stall_rows, aisle_columns, STALL_WIDTH, STALL_DEPTH, AISLE_WIDTH);
-  
   //0 0 is the top left corner of the SVG coordinates
   //units are abstract SVG units (not pixels) - automatically scales
-  svg.setAttribute("viewBox", `0 0 ${(stall_columns * STALL_DEPTH) + (aisle_columns * AISLE_WIDTH)} ${stall_rows * STALL_WIDTH} `);
+  svg.setAttribute("viewBox", `0 0 ${lot_dimension['lot_width']} ${lot_dimension['lot_height']} `);
 }
