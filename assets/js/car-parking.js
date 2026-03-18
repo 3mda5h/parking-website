@@ -1,7 +1,7 @@
 const NS = "http://www.w3.org/2000/svg"; //SVG namespace
 const car_lot_svg = document.getElementById("car-lot-svg");
 
-export function GenerateCarLot(total_vehicles, STALL_WIDTH, STALL_DEPTH, AISLE_WIDTH)
+export function generateCarLot(total_vehicles, STALL_WIDTH, STALL_DEPTH, AISLE_WIDTH)
 {
   car_lot_svg.innerHTML = ""; //clear existing stalls
   
@@ -11,15 +11,18 @@ export function GenerateCarLot(total_vehicles, STALL_WIDTH, STALL_DEPTH, AISLE_W
   let stall_columns = Math.ceil(total_vehicles / stall_rows);
   let aisle_columns = Math.ceil(stall_columns/2);
 
-  console.log("stall rows: ", stall_rows);
-  console.log("stall columns: ", stall_columns);
-  console.log("aisles columns: ", aisle_columns)
+  //console.log("stall rows: ", stall_rows);
+  //console.log("stall columns: ", stall_columns);
+  //console.log("aisles columns: ", aisle_columns)
   
+  //draw asphalt background
+  drawSVGRect(0, 0, (stall_columns * STALL_DEPTH) + (aisle_columns * AISLE_WIDTH), stall_rows * STALL_WIDTH, "#3e3d3dff");
+
   let stalls_drawn = 0;
   let current_x_position = 0;
   let current_y_position = 0;
-  //draw asphalt background
-  drawSVGRect(0, 0, (stall_columns * STALL_DEPTH) + (aisle_columns * AISLE_WIDTH), stall_rows * STALL_WIDTH, "#3e3d3dff");
+  
+  //iterate through grid and draw parking stalls
   for (let col = 0; col < (stall_columns + aisle_columns); col++)
   {
     for (let row = 0; row < stall_rows; row++) 
@@ -41,7 +44,7 @@ export function GenerateCarLot(total_vehicles, STALL_WIDTH, STALL_DEPTH, AISLE_W
     //Parking lot is structured such that the first column is always stalls, the second column is an aisle, and then every two stall columns there is an aisle. 
     //col % 3 will always be 1 if we are at an aisle column (where col is the current column number, starting at 0)
     //col % 1 will be 2 or 0 if we are at a stall column
-    if(col % 3 == 1)current_x_position += AISLE_WIDTH;
+    if(col % 3 == 1) current_x_position += AISLE_WIDTH;
     else current_x_position += STALL_DEPTH;
   }
 
@@ -51,6 +54,7 @@ export function GenerateCarLot(total_vehicles, STALL_WIDTH, STALL_DEPTH, AISLE_W
     };
 }
 
+//draws rectangle of given size and color at given position
 function drawSVGRect(x, y, width, height, fill_color)
 {
   const rect = document.createElementNS(NS, "rect"); //create rectangle elements in the SVG namespace
@@ -87,6 +91,7 @@ function drawStall(x, y, direction, STALL_DEPTH, STALL_WIDTH)
     line.setAttribute("y2", y2);
     line.setAttribute("stroke", "#eeeeee");
     line.setAttribute("stroke-width", 6);
+    line.setAttribute("vector-effect", "non-scaling-stroke");
     car_lot_svg.appendChild(line);
   }
 }
