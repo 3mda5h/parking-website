@@ -10,7 +10,7 @@ export function generateCarLot(total_vehicles, STALL_WIDTH, STALL_DEPTH, AISLE_W
   
   let stall_rows;
   if(total_vehicles <= 11) stall_rows = total_vehicles; //keep really small parking lots as just one column for simplicity
-  else stall_rows = Math.ceil(Math.sqrt(total_vehicles * (STALL_DEPTH / STALL_WIDTH) * 10)); //try to keep a good aspect ratio for bigger lots
+  else stall_rows = Math.ceil(Math.sqrt(total_vehicles * (STALL_DEPTH / STALL_WIDTH))); //try to keep a good aspect ratio for bigger lots
   let stall_columns = Math.ceil(total_vehicles / stall_rows);
   let aisle_columns = Math.ceil(stall_columns/2);
 

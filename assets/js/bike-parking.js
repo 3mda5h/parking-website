@@ -4,6 +4,9 @@
 const NS = "http://www.w3.org/2000/svg"; //SVG namespace
 const bike_lot_svg = document.getElementById("bike-lot-svg");
 
+const RACK_THICKNESS = 0.25;
+const CONCRETE_COLOR = "#b9b9b9";
+
 export function generateBikeLot(total_racks, RACK_WIDTH, RACK_HORIZONTAL_BUFFER, AISLE_WIDTH, RACK_VERTICAL_SPACING)
 {
   bike_lot_svg.innerHTML = ""; //clear existing stalls
@@ -17,7 +20,7 @@ export function generateBikeLot(total_racks, RACK_WIDTH, RACK_HORIZONTAL_BUFFER,
   let rack_columns = Math.ceil(total_racks / rack_rows);
   let aisle_columns = Math.ceil(rack_columns/2);
 
-drawSVGRect(0, 0, rack_columns * RACK_BOX_WIDTH + aisle_columns * AISLE_WIDTH, RACK_BOX_HEIGHT * rack_rows, "#838383"); //draw concrete spot
+drawSVGRect(0, 0, rack_columns * RACK_BOX_WIDTH + aisle_columns * AISLE_WIDTH, RACK_BOX_HEIGHT * rack_rows, CONCRETE_COLOR); //draw concrete spot
 
   let racks_drawn = 0;
   let current_x_position = 0;
@@ -33,7 +36,8 @@ drawSVGRect(0, 0, rack_columns * RACK_BOX_WIDTH + aisle_columns * AISLE_WIDTH, R
       {
         if(racks_drawn < total_racks) //only draw rack if we haven't drawn all racks needed
         {
-          drawRackBox(current_x_position, current_y_position, RACK_BOX_WIDTH, RACK_BOX_HEIGHT, RACK_HORIZONTAL_BUFFER, RACK_VERTICAL_SPACING, RACK_WIDTH);
+          drawSVGRect(current_x_position + RACK_HORIZONTAL_BUFFER, current_y_position + RACK_VERTICAL_SPACING/2, RACK_WIDTH, RACK_THICKNESS, "#000000")
+          //drawRackBox(current_x_position, current_y_position, RACK_BOX_WIDTH, RACK_BOX_HEIGHT, RACK_HORIZONTAL_BUFFER, RACK_VERTICAL_SPACING, RACK_WIDTH);
           racks_drawn++;
         }
         else drawSVGRect(current_x_position, current_y_position, AISLE_WIDTH + RACK_BOX_WIDTH, RACK_BOX_HEIGHT, "#ffffffff"); //white out this stall and its aisle
@@ -50,21 +54,6 @@ drawSVGRect(0, 0, rack_columns * RACK_BOX_WIDTH + aisle_columns * AISLE_WIDTH, R
         lot_width: (rack_columns * RACK_BOX_WIDTH) + (aisle_columns * AISLE_WIDTH),
         lot_height: rack_rows * RACK_BOX_HEIGHT
     };
-}
-
-function drawRackBox(x, y, RACK_BOX_WIDTH, RACK_BOX_HEIGHT, RACK_HORIZONTAL_BUFFER, RACK_VERTICAL_SPACING, RACK_WIDTH)
-{
-    let x1 = x + RACK_HORIZONTAL_BUFFER;
-    let x2 = x + RACK_HORIZONTAL_BUFFER + RACK_WIDTH;
-    let y1 = y + RACK_VERTICAL_SPACING/2;
-    const line = document.createElementNS(NS, "line"); //rack
-    line.setAttribute("x1", x1);
-    line.setAttribute("y1", y1);
-    line.setAttribute("x2", x2);
-    line.setAttribute("y2", y1);
-    line.setAttribute("stroke", "#000000");
-    line.setAttribute("stroke-width", 0.2);
-    bike_lot_svg.appendChild(line);
 }
 
 //draws rectangle of given size and color at given position
