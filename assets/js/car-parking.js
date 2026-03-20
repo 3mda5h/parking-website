@@ -1,9 +1,12 @@
 const NS = "http://www.w3.org/2000/svg"; //SVG namespace
-const car_lot_svg = document.getElementById("car-lot-svg");
+const CAR_LOT_SVG = document.getElementById("car-lot-svg");
+
+const PAINT_WIDTH = 0.5;
+const ASPHALT_COLOR = "#3e3d3dff";
 
 export function generateCarLot(total_vehicles, STALL_WIDTH, STALL_DEPTH, AISLE_WIDTH)
 {
-  car_lot_svg.innerHTML = ""; //clear existing stalls
+  CAR_LOT_SVG.innerHTML = ""; //clear existing stalls
   
   let stall_rows;
   if(total_vehicles <= 11) stall_rows = total_vehicles; //keep really small parking lots as just one column for simplicity
@@ -12,12 +15,9 @@ export function generateCarLot(total_vehicles, STALL_WIDTH, STALL_DEPTH, AISLE_W
   let aisle_columns = Math.ceil(stall_columns/2);
 
   let viewBoxWidth = (stall_columns * STALL_DEPTH) + (aisle_columns * AISLE_WIDTH)
-  //console.log("stall rows: ", stall_rows);
-  //console.log("stall columns: ", stall_columns);
-  //console.log("aisles columns: ", aisle_columns)
-  
+
   //draw asphalt background
-  drawSVGRect(0, 0, (stall_columns * STALL_DEPTH) + (aisle_columns * AISLE_WIDTH), stall_rows * STALL_WIDTH, "#3e3d3dff");
+  drawSVGRect(0, 0, (stall_columns * STALL_DEPTH) + (aisle_columns * AISLE_WIDTH), stall_rows * STALL_WIDTH, ASPHALT_COLOR);
 
   let stalls_drawn = 0;
   let current_x_position = 0;
@@ -36,7 +36,7 @@ export function generateCarLot(total_vehicles, STALL_WIDTH, STALL_DEPTH, AISLE_W
           let direction;
           if(col % 3 == 0) direction = "right";
           if(col % 3 == 2) direction = "left";
-          drawStall(current_x_position, current_y_position, direction, STALL_DEPTH, STALL_WIDTH, viewBoxWidth);
+          drawStall(current_x_position, current_y_position, direction, STALL_DEPTH, STALL_WIDTH);
           stalls_drawn++;
         }
         else drawSVGRect(current_x_position, current_y_position, AISLE_WIDTH + STALL_DEPTH, STALL_WIDTH, "#ffffffff"); //white out this stall and its aisle
@@ -64,35 +64,14 @@ function drawSVGRect(x, y, width, height, fill_color)
   rect.setAttribute("width", width);
   rect.setAttribute("height", height);
   rect.setAttribute("fill", fill_color);
-  car_lot_svg.appendChild(rect);
+  CAR_LOT_SVG.appendChild(rect);
 }
 
 //draws lines for a horizontal parking stall
 //inputted x, y coordinates are the top left corner of stall
-function drawStall(x, y, direction, STALL_DEPTH, STALL_WIDTH, viewBoxWidth) 
+function drawStall(x, y, direction, STALL_DEPTH, STALL_WIDTH) 
 {
-  let lines = 
-  [
-    // top line 
-    [x, y, x + STALL_DEPTH, y],
-    // bottom line
-    [x, y + STALL_WIDTH, x + STALL_DEPTH, y + STALL_WIDTH]
-  ];
-
-  if(direction == "left") lines.push([x + STALL_DEPTH, y, x + STALL_DEPTH, y + STALL_WIDTH]); 
-  //we don't need to ever draw a vertical line for the right parking stalls, because they will always come before a lot edge or a left spot
-  
-  for (const [x1, y1, x2, y2] of lines) //for each line (pair of x,y cords)
-  { 
-    //draw lines
-    const line = document.createElementNS(NS, "line");
-    line.setAttribute("x1", x1);
-    line.setAttribute("y1", y1);
-    line.setAttribute("x2", x2);
-    line.setAttribute("y2", y2);
-    line.setAttribute("stroke", "#eeeeee");
-    line.setAttribute("stroke-width", viewBoxWidth * 0.005);
-    //line.setAttribute("vector-effect", "non-scaling-stroke");
-    car_lot_svg.appendChild(line);
-  }
+  drawSVGRect(x, y, STALL_DEPTH, STALL_WIDTH, "#ffffff") //white square
+  if(direction == "right") drawSVGRect(x + PAINT_WIDTH/2, y + PAINT_WIDTH/2, STALL_DEPTH - PAINT_WIDTH/2, STALL_WIDTH - PAINT_WIDTH, ASPHALT_COLOR)  //overlap white square with smaller asphalt square, leaving correct amount of space to create white "lines" 
+  else drawSVGRect(x, y + PAINT_WIDTH/2, STALL_DEPTH - PAINT_WIDTH/2, STALL_WIDTH - PAINT_WIDTH, ASPHALT_COLOR)
 }
