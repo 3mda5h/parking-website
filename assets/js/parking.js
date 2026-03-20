@@ -18,6 +18,7 @@ const RACK_AISLE_WIDTH = 4 //width of the aisle, not including horizontal rack b
 const RACK_VERTICAL_SPACING = 3 //racks are vertically placed this far apart
 
 const svg = document.getElementById("lot-comparison-svg");
+const measurements_text = document.getElementById("measurements");
 const bike_lot_svg = document.getElementById("bike-lot-svg");
 
 document.addEventListener("DOMContentLoaded", generateLotComparison);
@@ -36,6 +37,19 @@ function generateLotComparison()
   let car_lot_dimension = generateCarLot(total_vehicles, STALL_WIDTH, STALL_DEPTH, AISLE_WIDTH);
   let bike_lot_dimension = generateBikeLot(total_racks, RACK_WIDTH, RACK_HORIZONTAL_BUFFER, RACK_AISLE_WIDTH, RACK_VERTICAL_SPACING);
   let viewbox_width = car_lot_dimension['lot_width'] + bike_lot_dimension['lot_width'];
+
+  let car_space_usage = total_vehicles * (STALL_DEPTH * STALL_WIDTH + STALL_WIDTH * (AISLE_WIDTH/2)); //this isn't totally accurate, is slightly smaller
+  // 1 football field: 57,600 ft^2
+  // 1/2 football field: 28,800 ft^2
+  // 1/4 football field: 14,400 ft^2
+  let football_statement;
+  if(14200 < car_space_usage && car_space_usage < 14600) football_statement = "This is about 1/4 of a football field.";
+  else if(28600 < car_space_usage && car_space_usage < 30000) football_statement = "This is about 1/2 of a football field.";
+  else if(57400 < car_space_usage && car_space_usage < 57800) football_statement = "This is about the size of <b> one football field </b>.";
+  else if(car_space_usage < 57600) football_statement = "This is "  + Math.round((car_space_usage/57000) * 100) + "% of the size of a football field";
+  else if(car_space_usage > 57600) football_statement = "This is equivalent to <b>"  + Math.round((car_space_usage/57000) * 100) / 100 + " football fields </b>"; //round to the nearest 10th
+
+  measurements_text.innerHTML = `<p> To park ${total_vehicles} cars, <b>${car_space_usage} square feet </b> of space is needed at a bare minimum! ${football_statement}</p>`;
 
   //0 0 is the top left corner of the SVG coordinates
   //units are abstract SVG units (not pixels) - automatically scales
