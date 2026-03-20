@@ -20,6 +20,8 @@ const RACK_VERTICAL_SPACING = 3 //racks are vertically placed this far apart
 const svg = document.getElementById("lot-comparison-svg");
 const bike_lot_svg = document.getElementById("bike-lot-svg");
 
+document.addEventListener("DOMContentLoaded", generateLotComparison);
+
 let generate_button = document.getElementById("generate-parking-lot-button");
 generate_button.addEventListener("click", generateLotComparison);
 
