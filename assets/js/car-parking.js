@@ -7,10 +7,11 @@ export function generateCarLot(total_vehicles, STALL_WIDTH, STALL_DEPTH, AISLE_W
   
   let stall_rows;
   if(total_vehicles <= 11) stall_rows = total_vehicles; //keep really small parking lots as just one column for simplicity
-  else stall_rows = Math.ceil(Math.sqrt(total_vehicles * (STALL_DEPTH / STALL_WIDTH))); //try to keep a good aspect ratio for bigger lots
+  else stall_rows = Math.ceil(Math.sqrt(total_vehicles * (STALL_DEPTH / STALL_WIDTH) * 10)); //try to keep a good aspect ratio for bigger lots
   let stall_columns = Math.ceil(total_vehicles / stall_rows);
   let aisle_columns = Math.ceil(stall_columns/2);
 
+  let viewBoxWidth = (stall_columns * STALL_DEPTH) + (aisle_columns * AISLE_WIDTH)
   //console.log("stall rows: ", stall_rows);
   //console.log("stall columns: ", stall_columns);
   //console.log("aisles columns: ", aisle_columns)
@@ -35,10 +36,10 @@ export function generateCarLot(total_vehicles, STALL_WIDTH, STALL_DEPTH, AISLE_W
           let direction;
           if(col % 3 == 0) direction = "right";
           if(col % 3 == 2) direction = "left";
-          drawStall(current_x_position, current_y_position, direction, STALL_DEPTH, STALL_WIDTH);
+          drawStall(current_x_position, current_y_position, direction, STALL_DEPTH, STALL_WIDTH, viewBoxWidth);
           stalls_drawn++;
         }
-        else drawSVGRect(current_x_position, current_y_position, AISLE_WIDTH + STALL_DEPTH, STALL_DEPTH, "#ffffffff"); //white out this stall and its aisle
+        else drawSVGRect(current_x_position, current_y_position, AISLE_WIDTH + STALL_DEPTH, STALL_WIDTH, "#ffffffff"); //white out this stall and its aisle
       }
     }
     //Parking lot is structured such that the first column is always stalls, the second column is an aisle, and then every two stall columns there is an aisle. 
@@ -68,7 +69,7 @@ function drawSVGRect(x, y, width, height, fill_color)
 
 //draws lines for a horizontal parking stall
 //inputted x, y coordinates are the top left corner of stall
-function drawStall(x, y, direction, STALL_DEPTH, STALL_WIDTH) 
+function drawStall(x, y, direction, STALL_DEPTH, STALL_WIDTH, viewBoxWidth) 
 {
   let lines = 
   [
@@ -90,8 +91,8 @@ function drawStall(x, y, direction, STALL_DEPTH, STALL_WIDTH)
     line.setAttribute("x2", x2);
     line.setAttribute("y2", y2);
     line.setAttribute("stroke", "#eeeeee");
-    line.setAttribute("stroke-width", 6);
-    line.setAttribute("vector-effect", "non-scaling-stroke");
+    line.setAttribute("stroke-width", viewBoxWidth * 0.005);
+    //line.setAttribute("vector-effect", "non-scaling-stroke");
     car_lot_svg.appendChild(line);
   }
 }
