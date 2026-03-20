@@ -1,5 +1,6 @@
 import { generateCarLot } from "./car-parking.js";
 import { generateBikeLot } from "./bike-parking.js";
+import { isPrime } from './primes.js';
 
 //CAR PARKING MEASUREMENTS: ---------------------------------------
 //based on dimensions found here: https://www.dimensions.com/element/90-degree-parking-spaces-layouts
@@ -20,7 +21,8 @@ const RACK_VERTICAL_SPACING = 3 //racks are vertically placed this far apart
 const svg = document.getElementById("lot-comparison-svg");
 const measurements_text = document.getElementById("measurements");
 const bike_lot_svg = document.getElementById("bike-lot-svg");
-
+const LOT_RATIO = 1/3; // stall columns/stall rows (not including aisles) - lot generation will attempt to get as close to this ratio as possible while maintaining perfect rectangle (if possible)
+ 
 document.addEventListener("DOMContentLoaded", generateLotComparison);
 
 let generate_button = document.getElementById("generate-parking-lot-button");
@@ -33,6 +35,14 @@ function generateLotComparison()
   else if(total_vehicles > 100000 ) total_vehicles = 100000; 
 
   let  total_racks = Math.ceil(total_vehicles/2) //1 bike rack fits 2 bikes
+
+  let stall_rows;
+  let layout;
+  if(total_vehicles <= 11) stall_rows = total_vehicles; //keep really small parking lots as just one column for simplicity
+  else layout = generateLotLayout(total_vehicles)
+
+  console.log("stall columns: " + layout['stall_columns']);
+  console.log("stall rows: " + layout['stall_rows']);
 
   let car_lot_dimension = generateCarLot(total_vehicles, STALL_WIDTH, STALL_DEPTH, AISLE_WIDTH);
   let bike_lot_dimension = generateBikeLot(total_racks, RACK_WIDTH, RACK_HORIZONTAL_BUFFER, RACK_AISLE_WIDTH, RACK_VERTICAL_SPACING);
@@ -57,3 +67,49 @@ function generateLotComparison()
   svg.setAttribute("viewBox", `0 0 ${viewbox_width + spacing} ${car_lot_dimension['lot_height']} `);
   bike_lot_svg.setAttribute("transform", `translate(${car_lot_dimension['lot_width'] + spacing}, 0)`);
 }
+
+function generateLotLayout(total_vehicles)
+{
+  if(isPrime[total_vehicles]) //if prime it can't be a perfect rectangle (other than super long), so just try to make it square-ish
+  {
+    let stall_columns = Math.round(Math.sqrt(total_vehicles * LOT_RATIO)); //3x as many rows as columns
+    let stall_rows = Math.ceil(total_vehicles / stall_columns);
+
+    return{
+      stall_rows: stall_rows,
+      stall_columns: stall_columns
+    };
+  }
+  else {
+    let pairs = getFactorPairs(total_vehicles);
+    let closest_pair = [pairs[0][0], pairs[0][1]]; //pair of factors closest to the desired ratio
+    for( const [num1, num2] of pairs) //num1 will always be the smallest number in the pair
+    {
+      console.log("factor pair: " + num1 + ", " + num2);
+      console.log(Math.abs(LOT_RATIO - num1/num2) + "<" + Math.abs(LOT_RATIO - closest_pair[0]/closest_pair[1]))
+      if(Math.abs(LOT_RATIO - num1/num2) < Math.abs(LOT_RATIO - closest_pair[0]/closest_pair[1])) 
+      {
+        closest_pair = [num1, num2];
+        console.log("closest pair: " + closest_pair);
+      }
+    }
+    return{
+      stall_rows: closest_pair[1],
+      stall_columns: closest_pair[0]
+    };
+  }
+}
+
+//ty claude
+function getFactorPairs(n) {
+  const pairs = [];
+  for (let i = 1; i * i <= n; i++) {
+    if (n % i === 0) {
+      pairs.push([i, n / i]);
+    }
+  }
+  return pairs;
+}
+
+// Example: getFactorPairs(24)
+// [[1, 24], [2, 12], [3, 8], [4, 6]]

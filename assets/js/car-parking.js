@@ -1,3 +1,4 @@
+import { isPrime } from './primes.js';
 const NS = "http://www.w3.org/2000/svg"; //SVG namespace
 const CAR_LOT_SVG = document.getElementById("car-lot-svg");
 
@@ -9,12 +10,13 @@ export function generateCarLot(total_vehicles, STALL_WIDTH, STALL_DEPTH, AISLE_W
   CAR_LOT_SVG.innerHTML = ""; //clear existing stalls
   
   let stall_rows;
+  let stall_columns;
+  let offset = 1;
+  //if (total_vehicles > 500) offset = 5;
   if(total_vehicles <= 11) stall_rows = total_vehicles; //keep really small parking lots as just one column for simplicity
-  else stall_rows = Math.ceil(Math.sqrt(total_vehicles * (STALL_DEPTH / STALL_WIDTH))); //try to keep a good aspect ratio for bigger lots
-  let stall_columns = Math.ceil(total_vehicles / stall_rows);
+  else stall_columns = Math.round(Math.sqrt(total_vehicles / 3));
+  stall_rows = Math.ceil(total_vehicles / stall_columns);
   let aisle_columns = Math.ceil(stall_columns/2);
-
-  let viewBoxWidth = (stall_columns * STALL_DEPTH) + (aisle_columns * AISLE_WIDTH)
 
   //draw asphalt background
   drawSVGRect(0, 0, (stall_columns * STALL_DEPTH) + (aisle_columns * AISLE_WIDTH), stall_rows * STALL_WIDTH, ASPHALT_COLOR);
@@ -74,4 +76,11 @@ function drawStall(x, y, direction, STALL_DEPTH, STALL_WIDTH)
   drawSVGRect(x, y, STALL_DEPTH, STALL_WIDTH, "#ffffff") //white square
   if(direction == "right") drawSVGRect(x + PAINT_WIDTH/2, y + PAINT_WIDTH/2, STALL_DEPTH - PAINT_WIDTH/2, STALL_WIDTH - PAINT_WIDTH, ASPHALT_COLOR)  //overlap white square with smaller asphalt square, leaving correct amount of space to create white "lines" 
   else drawSVGRect(x, y + PAINT_WIDTH/2, STALL_DEPTH - PAINT_WIDTH/2, STALL_WIDTH - PAINT_WIDTH, ASPHALT_COLOR)
+}
+
+function findLotDimensions()
+{
+  
+console.log(isPrime[97331]); // 1
+console.log(isPrime[99999]); // 0
 }
