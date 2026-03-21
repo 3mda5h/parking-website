@@ -22,7 +22,6 @@ const svg = document.getElementById("lot-comparison-svg");
 const measurements_text = document.getElementById("measurements");
 const bike_lot_svg = document.getElementById("bike-lot-svg");
 const CAR_LOT_RATIO = 1/3; // stall columns/stall rows (not including aisles) - lot generation will attempt to get as close to this ratio as possible while maintaining perfect rectangle
-const BIKE_LOT_RATIO = 2 //columns/rows, again not including aisles
 
 document.addEventListener("DOMContentLoaded", generateLotComparison);
 
@@ -41,30 +40,22 @@ function generateLotComparison()
   let stall_columns;
   let rack_rows;
   let rack_columns;
-  if(total_vehicles <= 11) 
+  if(total_vehicles <= 11) //keep really small parking lots as just one column for simplicity
   {
-    stall_rows = total_vehicles; //keep really small parking lots as just one column for simplicity
+    stall_rows = total_vehicles; 
     stall_columns = 1;
   }
   else 
   {
-    //car lot layout
+    //generate car lot layout based on prefered ratio
     let layout = generateLotLayout(total_vehicles, CAR_LOT_RATIO);
     stall_rows = layout['rows'];
     stall_columns = layout['columns'];
   }
-  if(total_racks < 20)
-  {
-    rack_rows = total_racks;
-    rack_columns = 1;
-  }
-  else
-  {
-    //bike lot layout
-    let layout = generateLotLayout(total_racks, BIKE_LOT_RATIO);
-    rack_rows = layout['rows'];
-    rack_columns = layout['columns'];
-  }
+  //bike lot layout
+  if(total_racks <= 30) rack_rows = total_racks; //keep small bike lots as just one column for simplicity
+  else rack_rows = Math.ceil(Math.sqrt(total_racks)); //try to keep a good aspect ratio for bigger lots
+  rack_columns = Math.ceil(total_racks / rack_rows);
 
   console.log("stall columns: " + stall_columns);
   console.log("stall rows: " + stall_rows);
@@ -78,11 +69,11 @@ function generateLotComparison()
   // 1/2 football field: 28,800 ft^2
   // 1/4 football field: 14,400 ft^2
   let football_statement;
-  if(14200 < car_space_usage && car_space_usage < 14600) football_statement = "This is about 1/4 of a football field.";
-  else if(28600 < car_space_usage && car_space_usage < 30000) football_statement = "This is about 1/2 of a football field.";
-  else if(57400 < car_space_usage && car_space_usage < 57800) football_statement = "This is about the size of <b> one football field </b>.";
-  else if(car_space_usage < 57600) football_statement = "This is "  + Math.round((car_space_usage/57000) * 100) + "% of the size of a football field";
-  else if(car_space_usage > 57600) football_statement = "This is equivalent to <b>"  + Math.round((car_space_usage/57000) * 100) / 100 + " football fields </b>"; //round to the nearest 10th
+  if(14200 < car_space_usage && car_space_usage < 14600) football_statement = "That's about 1/4 of a football field.";
+  else if(28600 < car_space_usage && car_space_usage < 30000) football_statement = "That's about 1/2 of a football field.";
+  else if(57400 < car_space_usage && car_space_usage < 57800) football_statement = "That's about the size of <b> one football field </b>.";
+  else if(car_space_usage < 57600) football_statement = "That's "  + Math.round((car_space_usage/57000) * 100) + "% of the size of a football field";
+  else if(car_space_usage > 57600) football_statement = "That's equivalent to <b>"  + Math.round((car_space_usage/57000) * 100) / 100 + " football fields </b>"; //round to the nearest 10th
 
   measurements_text.innerHTML = `<p> To park ${total_vehicles} cars, <b>${car_space_usage} square feet </b> of space is needed at a bare minimum! ${football_statement}</p>`;
 
