@@ -7,20 +7,15 @@ const bike_lot_svg = document.getElementById("bike-lot-svg");
 const RACK_THICKNESS = 0.25;
 const CONCRETE_COLOR = "#b9b9b9";
 
-export function generateBikeLot(total_racks, RACK_WIDTH, RACK_HORIZONTAL_BUFFER, AISLE_WIDTH, RACK_VERTICAL_SPACING)
+export function drawBikeLot(total_racks, RACK_WIDTH, RACK_HORIZONTAL_BUFFER, AISLE_WIDTH, RACK_VERTICAL_SPACING, rack_columns, rack_rows)
 {
   bike_lot_svg.innerHTML = ""; //clear existing stalls
 
   const RACK_BOX_WIDTH = RACK_HORIZONTAL_BUFFER * 2 + RACK_WIDTH;  //width of the buffer box surrounding each rack
   const RACK_BOX_HEIGHT = RACK_VERTICAL_SPACING; //height of the buffer box surrounding each rack. creating new variable for clarity since this is teeechnically a different thing than spacing
-  
-  let rack_rows;
-  if(total_racks <= 30) rack_rows = total_racks; //keep small bike lots as just one column for simplicity
-  else rack_rows = Math.ceil(Math.sqrt(total_racks)); //try to keep a good aspect ratio for bigger lots
-  let rack_columns = Math.ceil(total_racks / rack_rows);
   let aisle_columns = Math.ceil(rack_columns/2);
 
-drawSVGRect(0, 0, rack_columns * RACK_BOX_WIDTH + aisle_columns * AISLE_WIDTH, RACK_BOX_HEIGHT * rack_rows, CONCRETE_COLOR); //draw concrete spot
+  drawSVGRect(0, 0, rack_columns * RACK_BOX_WIDTH + aisle_columns * AISLE_WIDTH, RACK_BOX_HEIGHT * rack_rows, CONCRETE_COLOR); //draw concrete spot
 
   let racks_drawn = 0;
   let current_x_position = 0;
@@ -37,7 +32,6 @@ drawSVGRect(0, 0, rack_columns * RACK_BOX_WIDTH + aisle_columns * AISLE_WIDTH, R
         if(racks_drawn < total_racks) //only draw rack if we haven't drawn all racks needed
         {
           drawSVGRect(current_x_position + RACK_HORIZONTAL_BUFFER, current_y_position + RACK_VERTICAL_SPACING/2, RACK_WIDTH, RACK_THICKNESS, "#000000")
-          //drawRackBox(current_x_position, current_y_position, RACK_BOX_WIDTH, RACK_BOX_HEIGHT, RACK_HORIZONTAL_BUFFER, RACK_VERTICAL_SPACING, RACK_WIDTH);
           racks_drawn++;
         }
         else drawSVGRect(current_x_position, current_y_position, AISLE_WIDTH + RACK_BOX_WIDTH, RACK_BOX_HEIGHT, "#ffffffff"); //white out this stall and its aisle

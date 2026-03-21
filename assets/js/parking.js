@@ -1,5 +1,5 @@
-import { generateCarLot } from "./car-parking.js";
-import { generateBikeLot } from "./bike-parking.js";
+import { drawCarLot } from "./car-parking.js";
+import { drawBikeLot } from "./bike-parking.js";
 import { isPrime } from './primes.js';
 
 //CAR PARKING MEASUREMENTS: ---------------------------------------
@@ -21,8 +21,9 @@ const RACK_VERTICAL_SPACING = 3 //racks are vertically placed this far apart
 const svg = document.getElementById("lot-comparison-svg");
 const measurements_text = document.getElementById("measurements");
 const bike_lot_svg = document.getElementById("bike-lot-svg");
-const LOT_RATIO = 1/3; // stall columns/stall rows (not including aisles) - lot generation will attempt to get as close to this ratio as possible while maintaining perfect rectangle (if possible)
- 
+const CAR_LOT_RATIO = 1/3; // stall columns/stall rows (not including aisles) - lot generation will attempt to get as close to this ratio as possible while maintaining perfect rectangle
+const BIKE_LOT_RATIO = 2 //columns/rows, again not including aisles
+
 document.addEventListener("DOMContentLoaded", generateLotComparison);
 
 let generate_button = document.getElementById("generate-parking-lot-button");
@@ -37,15 +38,39 @@ function generateLotComparison()
   let  total_racks = Math.ceil(total_vehicles/2) //1 bike rack fits 2 bikes
 
   let stall_rows;
-  let layout;
-  if(total_vehicles <= 11) stall_rows = total_vehicles; //keep really small parking lots as just one column for simplicity
-  else layout = generateLotLayout(total_vehicles)
+  let stall_columns;
+  let rack_rows;
+  let rack_columns;
+  if(total_vehicles <= 11) 
+  {
+    stall_rows = total_vehicles; //keep really small parking lots as just one column for simplicity
+    stall_columns = 1;
+  }
+  else 
+  {
+    //car lot layout
+    let layout = generateLotLayout(total_vehicles, CAR_LOT_RATIO);
+    stall_rows = layout['rows'];
+    stall_columns = layout['columns'];
+  }
+  if(total_racks < 20)
+  {
+    rack_rows = total_racks;
+    rack_columns = 1;
+  }
+  else
+  {
+    //bike lot layout
+    let layout = generateLotLayout(total_racks, BIKE_LOT_RATIO);
+    rack_rows = layout['rows'];
+    rack_columns = layout['columns'];
+  }
 
-  console.log("stall columns: " + layout['stall_columns']);
-  console.log("stall rows: " + layout['stall_rows']);
+  console.log("stall columns: " + stall_columns);
+  console.log("stall rows: " + stall_rows);
 
-  let car_lot_dimension = generateCarLot(total_vehicles, STALL_WIDTH, STALL_DEPTH, AISLE_WIDTH);
-  let bike_lot_dimension = generateBikeLot(total_racks, RACK_WIDTH, RACK_HORIZONTAL_BUFFER, RACK_AISLE_WIDTH, RACK_VERTICAL_SPACING);
+  let car_lot_dimension = drawCarLot(total_vehicles, STALL_WIDTH, STALL_DEPTH, AISLE_WIDTH, stall_columns, stall_rows);
+  let bike_lot_dimension = drawBikeLot(total_racks, RACK_WIDTH, RACK_HORIZONTAL_BUFFER, RACK_AISLE_WIDTH, RACK_VERTICAL_SPACING, rack_columns, rack_rows);
   let viewbox_width = car_lot_dimension['lot_width'] + bike_lot_dimension['lot_width'];
 
   let car_space_usage = total_vehicles * (STALL_DEPTH * STALL_WIDTH + STALL_WIDTH * (AISLE_WIDTH/2)); //this isn't totally accurate, is slightly smaller
@@ -68,16 +93,16 @@ function generateLotComparison()
   bike_lot_svg.setAttribute("transform", `translate(${car_lot_dimension['lot_width'] + spacing}, 0)`);
 }
 
-function generateLotLayout(total_vehicles)
+function generateLotLayout(total_vehicles, prefered_ratio)
 {
   if(isPrime[total_vehicles]) //if prime it can't be a perfect rectangle (other than super long), so just try to make it square-ish
   {
-    let stall_columns = Math.round(Math.sqrt(total_vehicles * LOT_RATIO)); //3x as many rows as columns
-    let stall_rows = Math.ceil(total_vehicles / stall_columns);
+    let columns = Math.round(Math.sqrt(total_vehicles * prefered_ratio)); //3x as many rows as columns
+    let rows = Math.ceil(total_vehicles / columns);
 
     return{
-      stall_rows: stall_rows,
-      stall_columns: stall_columns
+      rows: rows,
+      columns: columns
     };
   }
   else {
@@ -85,17 +110,17 @@ function generateLotLayout(total_vehicles)
     let closest_pair = [pairs[0][0], pairs[0][1]]; //pair of factors closest to the desired ratio
     for( const [num1, num2] of pairs) //num1 will always be the smallest number in the pair
     {
-      console.log("factor pair: " + num1 + ", " + num2);
-      console.log(Math.abs(LOT_RATIO - num1/num2) + "<" + Math.abs(LOT_RATIO - closest_pair[0]/closest_pair[1]))
-      if(Math.abs(LOT_RATIO - num1/num2) < Math.abs(LOT_RATIO - closest_pair[0]/closest_pair[1])) 
+      //console.log("factor pair: " + num1 + ", " + num2);
+      //console.log(Math.abs(LOT_RATIO - num1/num2) + "<" + Math.abs(LOT_RATIO - closest_pair[0]/closest_pair[1]))
+      if(Math.abs(prefered_ratio - num1/num2) < Math.abs(prefered_ratio - closest_pair[0]/closest_pair[1])) 
       {
         closest_pair = [num1, num2];
-        console.log("closest pair: " + closest_pair);
+        //console.log("closest pair: " + closest_pair);
       }
     }
     return{
-      stall_rows: closest_pair[1],
-      stall_columns: closest_pair[0]
+      rows: closest_pair[1],
+      columns: closest_pair[0]
     };
   }
 }

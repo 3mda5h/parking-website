@@ -5,17 +5,9 @@ const CAR_LOT_SVG = document.getElementById("car-lot-svg");
 const PAINT_WIDTH = 0.5;
 const ASPHALT_COLOR = "#3e3d3dff";
 
-export function generateCarLot(total_vehicles, STALL_WIDTH, STALL_DEPTH, AISLE_WIDTH)
+export function drawCarLot(total_vehicles, STALL_WIDTH, STALL_DEPTH, AISLE_WIDTH, stall_columns, stall_rows)
 {
   CAR_LOT_SVG.innerHTML = ""; //clear existing stalls
-  
-  let stall_rows;
-  let stall_columns;
-  let offset = 1;
-  //if (total_vehicles > 500) offset = 5;
-  if(total_vehicles <= 11) stall_rows = total_vehicles; //keep really small parking lots as just one column for simplicity
-  else stall_columns = Math.round(Math.sqrt(total_vehicles / 3));
-  stall_rows = Math.ceil(total_vehicles / stall_columns);
   let aisle_columns = Math.ceil(stall_columns/2);
 
   //draw asphalt background
@@ -76,11 +68,4 @@ function drawStall(x, y, direction, STALL_DEPTH, STALL_WIDTH)
   drawSVGRect(x, y, STALL_DEPTH, STALL_WIDTH, "#ffffff") //white square
   if(direction == "right") drawSVGRect(x + PAINT_WIDTH/2, y + PAINT_WIDTH/2, STALL_DEPTH - PAINT_WIDTH/2, STALL_WIDTH - PAINT_WIDTH, ASPHALT_COLOR)  //overlap white square with smaller asphalt square, leaving correct amount of space to create white "lines" 
   else drawSVGRect(x, y + PAINT_WIDTH/2, STALL_DEPTH - PAINT_WIDTH/2, STALL_WIDTH - PAINT_WIDTH, ASPHALT_COLOR)
-}
-
-function findLotDimensions()
-{
-  
-console.log(isPrime[97331]); // 1
-console.log(isPrime[99999]); // 0
 }
